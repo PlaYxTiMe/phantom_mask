@@ -1,5 +1,5 @@
 # Third party package
-from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, Float, String, Time, ForeignKey
 from sqlalchemy.orm import relationship
 
 # Import from other folders
@@ -11,8 +11,8 @@ class Opentime(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     week_day = Column(String(10), nullable=False)
-    start_time = Column(DateTime, nullable=False)
-    end_time = Column(DateTime, nullable=False)
+    start_time = Column(Time, nullable=False)
+    end_time = Column(Time, nullable=False)
 
     stores_opentime = relationship(
         "StoresOpentime", 

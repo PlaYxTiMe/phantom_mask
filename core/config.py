@@ -26,4 +26,8 @@ class Settings(BaseSettings):
     JWT_ACCESS_EXPIRE: int = 30
     JWT_REFRESH_EXPIRE: int = 60 * 24 * 7
 
+    # Default admin user
+    ACCOUNT: str = "admin"
+    PASSWORD: str = "admin"
+
 settings = Settings()
