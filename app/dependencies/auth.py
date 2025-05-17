@@ -74,5 +74,6 @@ def authenticate_refresh_token(
         raise credentials_exception from e
     except Exception as e:
         error_logger.error(f"Error in authenticate_refresh_token: {e}", exc_info=True)
+        credentials_exception.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         credentials_exception.detail = "Error occurred while validating credentials, check error log."
         raise credentials_exception from e
