@@ -1,5 +1,5 @@
 # Third party package
-from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, Float, String, Boolean
 from sqlalchemy.orm import relationship
 
 # Import from other folders
@@ -7,6 +7,9 @@ from core.database import Base
 
 
 class Stores(Base):
+    """
+    Model for stores table.
+    """
     __tablename__ = "stores"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String(50), index=True, nullable=False)
