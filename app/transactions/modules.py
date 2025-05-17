@@ -1,5 +1,5 @@
 # Third party package
-from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
 # Import from other folders
@@ -7,6 +7,9 @@ from core.database import Base
 
 
 class Transactions(Base):
+    """
+    Model for transactions table.
+    """
     __tablename__ = "transactions"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -16,7 +19,7 @@ class Transactions(Base):
     product_id = Column(Integer, ForeignKey("products.id"), nullable=True)
     unit = Column(Integer, nullable=True)
     amount = Column(Float, nullable=False)
-    transactions_time = Column(DateTime, nullable=False)
+    transactions_date = Column(DateTime, nullable=False)
     description = Column(String(255), nullable=True)
     by_user = Column(Integer, ForeignKey("users.id"), nullable=False)
 

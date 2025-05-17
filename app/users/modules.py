@@ -8,6 +8,9 @@ from lib.auth_utils import hash_pass
 
 
 class Users(Base):
+    """
+    Model for Users table.
+    """
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
@@ -24,7 +27,6 @@ class Users(Base):
     transactions = relationship("Transactions", foreign_keys="Transactions.by_user", back_populates="user")
     tokens = relationship("Token", foreign_keys="Token.user_id", back_populates="user")
 
-    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if "password" in kwargs:

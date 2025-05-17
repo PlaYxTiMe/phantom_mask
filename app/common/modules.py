@@ -7,6 +7,9 @@ from core.database import Base
 
 
 class Opentime(Base):
+    """
+    Model for opentime table.
+    """
     __tablename__ = "opentime"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -23,6 +26,10 @@ class Opentime(Base):
 
 
 class StoresProducts(Base):
+    """
+    Model for stores_products table.
+    It is a many-to-many relationship between stores and products.
+    """
     __tablename__ = "stores_products"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -35,6 +42,10 @@ class StoresProducts(Base):
 
 
 class StoresOpentime(Base):
+    """
+    Model for stores_opentime table.
+    It is a many-to-many relationship between stores and opentime.
+    """
     __tablename__ = "stores_opentime"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

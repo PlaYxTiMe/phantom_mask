@@ -4,15 +4,14 @@ from datetime import datetime
 from typing import List, Dict
 
 
-# Standardize the names of the weekdays
-WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat', 'Sun']
-
-
 def expand_days(day_str: str) -> List[str]:
     """
     Expand strings like 'Mon - Fri' or 'Mon, Wed, Fri' into a list of individual weekdays.
     :param day_str: A string representing the days of the week.    
     """
+    # Standardize the names of the weekdays
+    WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat', 'Sun']
+
     days = []
     segments = [seg.strip() for seg in day_str.split(',')]
     for seg in segments:

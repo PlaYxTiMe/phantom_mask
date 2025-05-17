@@ -21,9 +21,11 @@ def verify_pass(provided_password:str, stored_password:bytes) -> bool:
     stored_password = stored_password.decode('ascii')
     salt = stored_password[:64]
     stored_password = stored_password[64:]
-    pwdhash = hashlib.pbkdf2_hmac('sha512',
-                                  provided_password.encode('utf-8'),
-                                  salt.encode('ascii'),
-                                  100000)
+    pwdhash = hashlib.pbkdf2_hmac(
+        'sha512',
+        provided_password.encode('utf-8'),
+        salt.encode('ascii'),
+        100000
+    )
     pwdhash = binascii.hexlify(pwdhash).decode('ascii')
     return pwdhash == stored_password

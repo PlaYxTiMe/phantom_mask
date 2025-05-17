@@ -7,6 +7,9 @@ from core.database import Base
 
 
 class Customers(Base):
+    """
+    Model for customers table.
+    """
     __tablename__ = "customers"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -16,8 +19,8 @@ class Customers(Base):
     registered_time = Column(DateTime, nullable=False)
     registered_by = Column(Integer, ForeignKey("users.id"))
     revoke = Column(Boolean, default=False)
-    revoked_time = Column(DateTime, nullable=True)
-    revoked_by = Column(Integer, ForeignKey("users.id"))
+    revoked_time = Column(DateTime, nullable=True, default=None)
+    revoked_by = Column(Integer, ForeignKey("users.id"), nullable=True, default=None)
 
     registered_user = relationship("Users", foreign_keys=[registered_by], back_populates="registered_customers")
     revoked_user = relationship("Users", foreign_keys=[revoked_by], back_populates="revoked_customers")

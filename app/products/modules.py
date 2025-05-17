@@ -1,5 +1,5 @@
 # Third party package
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import relationship
 
 # Import from other folders
@@ -7,6 +7,9 @@ from core.database import Base
 
 
 class Products(Base):
+    """
+    Model for products table.
+    """
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
