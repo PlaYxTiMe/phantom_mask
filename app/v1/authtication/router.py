@@ -14,6 +14,7 @@ from app.v1.authtication import router
 from app.v1.authtication.schemas import TokenResponse, TokenWithUserResponse
 from app.v1.authtication.modules import Token
 from app.v1.users.modules import Users
+from app.v1.common.schemas import ResponseModel
 from app.dependencies.auth import authenticate_user, authenticate_refresh_token
 from app.dependencies.user import get_current_user
 
@@ -21,7 +22,7 @@ from app.dependencies.user import get_current_user
 router = APIRouter()
 
 
-@router.post("/token")
+@router.post("/token", response_model=ResponseModel[TokenWithUserResponse])
 async def token(
     db: db_session,
     user: Annotated[Users, Depends(authenticate_user)],
@@ -38,19 +39,22 @@ async def token(
         db, TokenType.REFRESH, user.id
     )
 
-    return TokenWithUserResponse(
-        access_token=access_token,
-        access_token_expire_at=access_token_expire_at,
-        refresh_token=refresh_token,
-        refresh_token_expire_at=refresh_token_expire_at,
-        token_type=JWT.JWT_TYPE,
-        account=user.account,
-        nickname=user.nickname,
-        is_admin=user.is_admin
+    return ResponseModel(
+        success=True,
+        data = TokenWithUserResponse(
+            access_token=access_token,
+            access_token_expire_at=access_token_expire_at,
+            refresh_token=refresh_token,
+            refresh_token_expire_at=refresh_token_expire_at,
+            token_type=JWT.JWT_TYPE,
+            account=user.account,
+            nickname=user.nickname,
+            is_admin=user.is_admin
+        )
     )
 
 
-@router.post("/token/refresh")
+@router.post("/token/refresh", response_model=ResponseModel[TokenResponse])
 async def token_refresh(
     db: db_session,
     refresh_token_modules: Annotated[Token, Depends(authenticate_refresh_token)]
@@ -58,7 +62,7 @@ async def token_refresh(
     """
     Refresh the access token using the refresh token.
     :param db: Database session.
-    :param refresh_token_modules: The refresh token db module.
+    :param refresh_token_modules: The token db module.
     """
     now_time = datetime.now(timezone.utc)
     access_token, access_token_expire_at = create_token_and_expiration(
@@ -74,16 +78,19 @@ async def token_refresh(
         refresh_token = refresh_token_modules.token
         refresh_token_expire_at = refresh_token_modules.expires_at
 
-    return TokenResponse(
-        access_token=access_token,
-        access_token_expire_at=access_token_expire_at,
-        refresh_token=refresh_token,
-        refresh_token_expire_at=refresh_token_expire_at,
-        token_type=JWT.JWT_TYPE
+    return ResponseModel(
+        success=True,
+        data=TokenResponse(
+            access_token=access_token,
+            access_token_expire_at=access_token_expire_at,
+            refresh_token=refresh_token,
+            refresh_token_expire_at=refresh_token_expire_at,
+            token_type=JWT.JWT_TYPE
+        )
     )
 
 
-@router.post("/token/revoke")
+@router.post("/token/revoke", response_model=ResponseModel[dict])
 async def token_revoke(
     db: db_session,
     user: Annotated[Users, Depends(get_current_user)],
@@ -92,4 +99,4 @@ async def token_revoke(
     Revoke the access and refresh tokens for the authenticated user.
     """
     revoke_token(db, user.id)
-    return {'success': True}
+    return ResponseModel(success=True, data={})

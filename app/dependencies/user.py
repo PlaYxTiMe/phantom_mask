@@ -11,7 +11,8 @@ from core.auth import JWT, TokenType
 from core.config import settings
 from core.database import db_session
 from app.auth import oauth2_scheme
-from app.v1.users.service import UserService
+from app.v1.users.service import UserService, ValidateUserService
+from app.v1.users.schemas import RegisterPayload, UpdatePasswordPayload
 from app.v1.users.modules import Users
 from app.v1.authtication.schemas import TokenPayload
 from app.v1.authtication.modules import Token
@@ -51,5 +52,55 @@ async def get_current_user(
             headers={"WWW-Authenticate": JWT.JWT_TYPE}
         )
     user = service.get_user(user_id)
+    if user.revoke:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="This account has been revoked",
+            headers={"WWW-Authenticate": JWT.JWT_TYPE}
+        )
 
     return user
+
+
+async def check_admin(
+    current_user: Annotated[Users, Depends(get_current_user)]
+) -> None:
+    """
+    Dependency to check if the current user is an admin.
+    :param db: Database session.
+    :param current_user: The current user.
+    """
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to perform this action"
+        )
+
+
+def validate_create_data(
+    validate: Annotated[ValidateUserService, Depends()],
+    data: RegisterPayload
+) -> RegisterPayload:
+    """
+    Validate the user data for registration.
+    :param validate: ValidateUserService instance.
+    :param data: The user data to be validated.
+    """
+    validate.valid_account(data.account)
+    validate.valid_nickname(data.nickname)
+
+    return data
+
+
+def validate_password_data(
+    validate: Annotated[ValidateUserService, Depends()],
+    data: UpdatePasswordPayload
+) -> UpdatePasswordPayload:
+    """
+    Validate the password data for registration.
+    :param validate: ValidateUserService instance.
+    :param data: The user data to be validated.
+    """
+    validate.valid_change_password(data)
+
+    return data
