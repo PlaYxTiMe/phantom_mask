@@ -30,4 +30,5 @@ class Users(Base):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if "password" in kwargs:
+            # Hash the password before storing it
             self.password = hash_pass(kwargs["password"])

@@ -15,11 +15,15 @@ class Settings(BaseSettings):
     # Server debug mode
     DEBUG_MODE: bool = True
 
+    # API version
+    API_VERSION: str = "v1"
+
     # Database
     DB_URL: str = "sqlite:///sqlite.db"
 
     # JWT settings
-    JWT_SECRET_KEY: str = "your_secret_key"
+    JWT_ACCESS_SECRET_KEY: str = "access_secret_key"
+    JWT_REFRESH_SECRET_KEY: str = "refresh_secret_key"
     ALGORITHM: str = "HS256"
 
     # JWT expire time settings(minutes)
