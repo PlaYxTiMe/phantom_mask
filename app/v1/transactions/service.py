@@ -163,6 +163,7 @@ class TransactionService(BaseService):
                 Transactions.transactions_date >= start_time,
                 Transactions.transactions_date <= end_time
             )
+            .order_by(Transactions.transactions_date.desc())
         )
         
         items = query.all()

@@ -190,8 +190,8 @@ class StoreService(BaseService):
         """
         store_query = self.db.query(Stores).filter(
             and_(
-                Stores.name == store_name,
-                Stores.store_type == store_type
+                func.lower(Stores.name) == store_name.lower(),
+                func.lower(Stores.store_type) == store_type.lower()
             )
         )
 
