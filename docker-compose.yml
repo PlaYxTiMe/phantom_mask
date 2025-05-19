@@ -1,0 +1,10 @@
+services:
+  phantom_api:
+    build: ./phantom_mask/
+    restart: always
+    container_name: phantom_api_server
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/opt/phantom_mask:/phantom_mask"
+    ports:
+      - "8000:8000"
