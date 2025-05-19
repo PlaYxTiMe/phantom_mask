@@ -1,9 +1,9 @@
 # Response
-> The Current content is an **example template**; please edit it to fit your style and content.
 ## A. Required Information
 ### A.1. Requirement Completion Rate
 - [x] List all pharmacies open at a specific time and on a day of the week if requested.
-  - Implemented at xxx API.
+  - Endpoint: /api/v1/stores/get_stores.
+  - If no parameters are provided, the API returns all stores. To maintain flexibility, I added a new parameter store_type to the stores, so that other types of stores can also be supported in the future. This API supports pagination and search functionality. The search can filter stores based on date or day of the week (please use English abbreviations for the days) within their business hours.
 - [x] List all masks sold by a given pharmacy, sorted by mask name or price.
   - Implemented at xxx API.
 - [x] List all pharmacies with more or less than x mask products within a price range.
