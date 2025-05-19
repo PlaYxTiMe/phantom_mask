@@ -68,8 +68,6 @@ async def token_refresh(
 ) -> TokenResponse:
     """
     Refresh the access token using the refresh token.
-    :param db: Database session.
-    :param refresh_token_modules: The token db module.
     """
     now_time = datetime.now(timezone.utc)
     access_token, access_token_expire_at = create_token_and_expiration(

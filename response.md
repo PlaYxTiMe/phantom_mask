@@ -24,12 +24,11 @@
   - [POST] /api/v1/transactions/purchase
   - This API requires multiple parameters. Customer information can be retrieved from the /api/v1/customers/get_customers endpoint. For testing purposes, the remaining parameters can be conveniently filled using data from pharmacies.json.
 ### A.2. API Document
-> Import [this](https://drive.google.com/file/d/1iy_5vEVW3tP59tzZroXny3_Pwd7vLoOr/view?usp=sharing) json file to Postman.
-> API Document Endpoint: /docs or /redoc
-> [Google document](https://docs.google.com/document/d/1hyj0xzWqWRY8QMrLK--tMldoir4IJ38TKA56C93HXV4/edit?tab=t.0)
+Import [this](https://drive.google.com/file/d/1iy_5vEVW3tP59tzZroXny3_Pwd7vLoOr/view?usp=sharing) json file to Postman.
+API Document Endpoint: [Demo_site_doc1](https://api.kurocat.space/docs) or [Demo_site_doc2](https://api.kurocat.space/redoc)
+[Google document](https://docs.google.com/document/d/1hyj0xzWqWRY8QMrLK--tMldoir4IJ38TKA56C93HXV4/edit?tab=t.0)
 
 ### A.3. Import Data Commands
-Please run these two script commands to migrate the data into the database.
 
 Please navigate to the project directory, create a virtual environment, and install the required packages.
 
@@ -47,7 +46,9 @@ $ python etl_db.py import --file [PATH_TO_FILE/user.json] --type customer
 ```
 You can import either of the two files first, or even import them after the server has started.
 
-### A.4. Start server
+### A.4. Start API server
+
+You can first add a .env file to the project directory—the content can be referenced [here](https://github.com/PlaYxTiMe/phantom_mask/blob/devlop/core/config.py). If you don't add it, that's fine too, as default values are already set. Please visit [here](https://github.com/PlaYxTiMe/phantom_mask/blob/devlop/core/config.py) to obtain the admin account and password.
 
 If it's in the testing environment, please use:
 ```bash
