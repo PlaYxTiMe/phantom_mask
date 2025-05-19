@@ -15,8 +15,18 @@ class CommonPage(BaseModel):
         page (int): The current page number. Defaults to 1.
         per_page (int): The number of items to display per page. Defaults to 10.
     """
-    page: int = Field(1, ge=1, description="The current page number, must be >= 1")
-    per_page: int = Field(10, gt=0, description="The number of items to display per page, must be > 0")
+    page: int = Field(
+        1, 
+        ge=1, 
+        description="The current page number, must be >= 1", 
+        example=1
+    )
+    per_page: int = Field(
+        10, 
+        gt=0, 
+        description="The number of items to display per page, must be > 0", 
+        example=10
+    )
 
 
 class GetCustomersPayload(CommonPage):
@@ -33,10 +43,14 @@ class GetCustomersPayload(CommonPage):
     """
     search_field: Annotated[
         Optional[Literal["name", "phone_number"]],
-        Field(default=None, description="Optional search field, can be one of: 'name', 'phone-number', 'datetime'")
+        Field(
+            default=None,
+            description="Optional search field, can be one of: 'name', 'phone-number', 'datetime'",
+            example="name"
+        )
     ]
     search_value: str = Field("", description="The value to match for the selected search field")
-    only_active: bool = Field(True, description="If True, only returns active customers")
+    only_active: bool = Field(True, description="If True, only returns active customers", example=True)
 
     @model_validator(mode='after')
     def check_argument(self) -> 'GetCustomersPayload':
@@ -53,14 +67,16 @@ class RegisterPayload(BaseModel):
         min_length=3,
         max_length=50,
         pattern=r'^[A-Za-z ]+$',
-        description="Customer's name(only English letters and spaces)"
+        description="Customer's name(only English letters and spaces)",
+        example="John Doe"
     )
     phone_number: str = Field(
         ...,
         min_length=10,
         max_length=10,
         pattern=r'^\d{10}$',
-        description="Customer's phone number"
+        description="Customer's phone number",
+        example="0987654321"
     )
 
 

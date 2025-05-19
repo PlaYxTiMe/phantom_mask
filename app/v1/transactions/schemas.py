@@ -17,10 +17,20 @@ class CommonPayload(BaseModel):
         start_time (datetime): Start datetime of the query range.
         end_time (datetime): End datetime of the query range.
     """
-    transactions_type: str = Field(..., min_length=1, description="Type of transaction, e.g. 'purchase', 'recharge', 'refund'")
-    product_type: str = Field(..., min_length=1, description="Category of the product, e.g. 'mask'")
-    start_time: datetime = Field(..., description="Start datetime of the query range")
-    end_time: datetime = Field(..., description="End datetime of the query range")
+    transactions_type: str = Field(
+        ...,
+        min_length=1,
+        description="Type of transaction, e.g. 'purchase', 'recharge', 'refund'",
+        example="purchase"
+    )
+    product_type: str = Field(
+        ...,
+        min_length=1,
+        description="Category of the product, e.g. 'mask'",
+        example="mask"
+    )
+    start_time: datetime = Field(..., description="Start datetime of the query range", example="2025-01-01T00:00:00Z")
+    end_time: datetime = Field(..., description="End datetime of the query range", example="2025-01-01T23:59:59Z")
 
     @model_validator(mode='after')
     def check_argument(self) -> 'CommonPayload':
@@ -41,7 +51,7 @@ class TopByTransactionsPayload(CommonPayload):
     Attributes:
         rank_scope (int): Number of top records to return, must be > 0 (default 10).
     """
-    rank_scope: int = Field(10, gt=0, description="Number of top records to return, must be > 0")
+    rank_scope: int = Field(10, gt=0, description="Number of top records to return, must be > 0", example=10)
 
 
 class SummaryByTransactionsPayload(CommonPayload):
@@ -61,8 +71,13 @@ class CustomerCommonPayload(BaseModel):
         customer_phone_number (str): Phone number of the customer. Only digits allowed.
         description (str, optional): Optional description of the transaction or request.
     """
-    customer_name: str = Field(..., min_length=1, description="Name of the customer")
-    customer_phone_number: str = Field(..., min_length=1, description="Phone number of the customer")
+    customer_name: str = Field(..., min_length=1, description="Name of the customer", example="John Doe")
+    customer_phone_number: str = Field(
+        ...,
+        min_length=1,
+        description="Phone number of the customer",
+        example="0987654321"
+    )
     description: str = Field(None, description="Description of the transaction")
 
 
@@ -82,13 +97,13 @@ class PurchasePayload(CustomerCommonPayload):
         unit (int): Number of units being purchased; must be greater than 0.
         description (str, optional): Optional text describing the transaction (e.g., notes or purpose).
     """
-    store_name: str = Field(..., min_length=1, description="Name of the store")
-    store_type: str = Field(..., min_length=1, description="Type of the store")
-    product_type: str = Field(..., min_length=1, description="Type of the product")
-    brand: str = Field(..., min_length=1, description="Brand of the product")
-    color: str = Field(..., min_length=1, description="Color of the product")
-    pack_size: int = Field(..., gt=0, description="Pack size of the product")
-    unit: int = Field(..., gt=0, description="Unit of the product")
+    store_name: str = Field(..., min_length=1, description="Name of the store", example="Pharmacy A")
+    store_type: str = Field(..., min_length=1, description="Type of the store", example="pharmacy")
+    product_type: str = Field(..., min_length=1, description="Type of the product", example="mask")
+    brand: str = Field(..., min_length=1, description="Brand of the product", example="Brand A")
+    color: str = Field(..., min_length=1, description="Color of the product", example="Blue")
+    pack_size: int = Field(..., gt=0, description="Pack size of the product", example=10)
+    unit: int = Field(..., gt=0, description="Unit of the product", example=5)
 
 
 class RechargePayload(CustomerCommonPayload):

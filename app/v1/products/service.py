@@ -6,6 +6,7 @@ from collections import defaultdict
 # Third party package
 import operator
 from fastapi import Request, HTTPException, status, Depends
+from sqlalchemy import func
 
 # Import from other folders
 from core.service import BaseService
@@ -80,7 +81,7 @@ class ProductService(BaseService):
         query = self.db.query(StoresProducts).join(Products).filter(
             self.ops[condition.lower()](StoresProducts.price, price)
         ).filter(
-            Products.product_type == product_type
+            func.lower(Products.product_type) == product_type.lower()
         )
 
         if only_active:
@@ -147,7 +148,7 @@ class ProductService(BaseService):
         """
         query = (
             self.db.query(Products).join(StoresProducts).join(Stores).filter(
-                Products.product_type == product_type
+                func.lower(Products.product_type) == product_type.lower()
             )
         )
 
@@ -222,11 +223,11 @@ class ProductService(BaseService):
             StoresProducts: The matching store-product relationship, including price and inventory info.
         """
         query = self.db.query(StoresProducts).join(Products).join(Stores).filter(
-            Stores.name == store_name,
-            Stores.store_type == store_type,
-            Products.product_type == product_type,
-            Products.brand == brand,
-            Products.color == color,
+            func.lower(Stores.name) == store_name.lower(),
+            func.lower(Stores.store_type) == store_type.lower(),
+            func.lower(Products.product_type) == product_type.lower(),
+            func.lower(Products.brand) == brand.lower(),
+            func.lower(Products.color) == color.lower(),
             Products.pack_size == pack_size
         )
         if only_active:

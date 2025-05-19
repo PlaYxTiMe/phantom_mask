@@ -4,7 +4,7 @@ from typing import List, Dict
 from datetime import datetime
 
 # Third party package
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 from fastapi import Request, HTTPException, status, Depends
 
 # Import from other folders
@@ -67,7 +67,7 @@ class StoreService(BaseService):
 
         opentimes = self.db.query(Opentime).filter(
             and_(
-                Opentime.week_day == weekday,
+                func.lower(Opentime.week_day) == weekday.lower(),
                 Opentime.start_time < time,
                 Opentime.end_time > time
             )
@@ -88,7 +88,7 @@ class StoreService(BaseService):
             List[int]: A list of unique store IDs that are open on the specified weekday.
         """
         opentimes = self.db.query(Opentime).filter(
-            Opentime.week_day == weekday_string.lower().capitalize()
+            func.lower(Opentime.week_day) == weekday_string.lower()
         ).all()
         return list({so.store_id for ot in opentimes for so in ot.stores_opentime})
 
@@ -121,7 +121,7 @@ class StoreService(BaseService):
         """
         query = self.db.query(Stores)
         if store_type:
-            query = query.filter(Stores.store_type == store_type)
+            query = query.filter(func.lower(Stores.store_type) == store_type.lower())
         if only_active:
             query = query.filter(Stores.is_active == only_active)
         
@@ -209,7 +209,7 @@ class StoreService(BaseService):
         if only_active:
             query = query.filter(Products.is_active == only_active)
         
-        query = query.filter(Products.product_type == product_type)
+        query = query.filter(func.lower(Products.product_type) == product_type.lower())
 
         if search_fields and fields_value:
             query = query.filter(getattr(Products, search_fields).ilike(f"%{fields_value}%"))
@@ -257,8 +257,8 @@ class StoreService(BaseService):
         """
         query = self.db.query(Stores).filter(
             and_(
-                Stores.name == store_name,
-                Stores.store_type == store_type
+                func.lower(Stores.name) == store_name.lower(),
+                func.lower(Stores.store_type) == store_type.lower()
             )
         )
 

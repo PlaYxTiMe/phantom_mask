@@ -14,8 +14,18 @@ class CommonPage(BaseModel):
         page (int): The current page number. Defaults to 1.
         per_page (int): The number of items to display per page. Defaults to 10.
     """
-    page: int = Field(1, ge=1, description="The current page number, must be >= 1")
-    per_page: int = Field(10, gt=0, description="The number of items to display per page, must be > 0")
+    page: int = Field(
+        1, 
+        ge=1, 
+        description="The current page number, must be >= 1",
+        example=1    
+    )
+    per_page: int = Field(
+        10, 
+        gt=0, 
+        description="The number of items to display per page, must be > 0",
+        example=10    
+    )
 
 
 class QueryProductsPayload(CommonPage):
@@ -29,13 +39,17 @@ class QueryProductsPayload(CommonPage):
         fields_value (str): The search keyword/value to match against the selected search field.
         only_active (bool): If True, limits results to only active products and stores.
     """
-    product_type: str = Field(..., description="The type/category of the product to filter by")
+    product_type: str = Field(..., description="The type/category of the product to filter by", example="mask")
     search_fields: Annotated[
         Optional[Literal["brand", "color"]],
-        Field(default=None, description="Optional search field, can be one of: 'brand', 'color'")
+        Field(
+            default=None,
+            description="Optional search field, can be one of: 'brand', 'color'",
+            example="brand"
+        )
     ]
     fields_value: str = Field("", description="The value to match for the selected search field")
-    only_active: bool = Field(True, description="If True, only returns active products & stores")
+    only_active: bool = Field(True, description="If True, only returns active products & stores", example=True)
 
 
 class PriceConditionPayload(BaseModel):
@@ -57,11 +71,11 @@ class PriceConditionPayload(BaseModel):
     Validation:
         Ensures the provided price is non-negative.
     """
-    product_type: str = Field(..., description="The type of product to filter by")
+    product_type: str = Field(..., description="The type of product to filter by", example="mask")
     price: float = Field(..., gt=0, description="The price value to compare against")
-    condition: Literal["gt", "lt", "ge", "le", "eq"] = Field(..., description="Comparison operator")
-    store_type: str = Field("", description="The store category to filter by")
-    only_active: bool = Field(True, description="If True, only include active products and stores")
+    condition: Literal["gt", "lt", "ge", "le", "eq"] = Field(..., description="Comparison operator", example="gt")
+    store_type: str = Field("", description="The store category to filter by", example="pharmacy")
+    only_active: bool = Field(True, description="If True, only include active products and stores", example=True)
 
 
 class StoreCommonResponse(BaseModel):

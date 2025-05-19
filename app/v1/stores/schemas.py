@@ -15,8 +15,13 @@ class CommonPage(BaseModel):
         page (int): The current page number. Defaults to 1.
         per_page (int): The number of items to display per page. Defaults to 10.
     """
-    page: int = Field(1, ge=1, description="The current page number, must be >= 1")
-    per_page: int = Field(10, gt=0, description="The number of items to display per page, must be > 0")
+    page: int = Field(1, ge=1, description="The current page number, must be >= 1", example=1)
+    per_page: int = Field(
+        10,
+        gt=0,
+        description="The number of items to display per page, must be > 0",
+        example=10
+    )
 
 
 class QueryStorePayload(CommonPage):
@@ -37,13 +42,17 @@ class QueryStorePayload(CommonPage):
         - Validates `datetime` format if `search_fields` is "datetime".
         - Ensures valid weekday abbreviation if `search_fields` is "day-of-week".
     """
-    store_type: str = Field("", description="Optional filter by store type")
+    store_type: str = Field("", description="Optional filter by store type", example="pharmacy")
     search_fields: Annotated[
         Optional[Literal["name", "datetime", "day-of-week"]],
-        Field(default=None, description="Optional search field, can be one of: 'name', 'datetime', 'day-of-week'")
+        Field(
+            default=None,
+            description="Optional search field, can be one of: 'name', 'datetime', 'day-of-week'",
+            example="name"
+        )
     ]
     fields_value: str = Field("", description="The value to match for the selected search field")
-    only_active: bool = Field(True, description="If True, only returns active stores")
+    only_active: bool = Field(True, description="If True, only returns active stores", example=True)
 
     @model_validator(mode='after')
     def check_argument(self) -> 'QueryStorePayload':
@@ -82,16 +91,20 @@ class QueryStoreProductsPayload(CommonPage):
         - Ensures `store_name`, `store_type`, and `product_type` are not empty.
         - Ensures `fields_value` is provided if `search_fields` is specified.
     """
-    store_name: str = Field(..., min_length=1, description="Name of the store")
-    store_type: str = Field(..., min_length=1, description="Type of the store (e.g., pharmacy)")
-    product_type: str = Field(..., min_length=1, description="Type of product (e.g., mask)")
+    store_name: str = Field(..., min_length=1, description="Name of the store", example="Pharmacy A")
+    store_type: str = Field(..., min_length=1, description="Type of the store (e.g., pharmacy)", example="pharmacy")
+    product_type: str = Field(..., min_length=1, description="Type of product (e.g., mask)", example="mask")
     search_fields: Annotated[
         Optional[Literal["brand", "color"]],
-        Field(default=None, description="Optional search field, can be one of: 'brand', 'color'")
+        Field(
+            default=None,
+            description="Optional search field, can be one of: 'brand', 'color'",
+            example="brand"
+        )
     ]
     fields_value: str = Field("", description="The value to match for the selected search field")
-    only_active: bool = Field(True, description="If True, only include active products")
-    reverse: bool = Field(False, description="If True, reverse the default sorting order")
+    only_active: bool = Field(True, description="If True, only include active products", example=True)
+    reverse: bool = Field(False, description="If True, reverse the default sorting order", example=True)
 
     @model_validator(mode='after')
     def check_argument(self) -> 'QueryStoreProductsPayload':

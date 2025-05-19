@@ -70,8 +70,8 @@ class TransactionService(BaseService):
             )
             .join(Products, Transactions.product_id == Products.id)
             .filter(
-                Transactions.transactions_type == transactions_type,
-                Products.product_type == product_type,
+                func.lower(Transactions.transactions_type) == transactions_type.lower(),
+                func.lower(Products.product_type) == product_type.lower(),
                 Transactions.transactions_date >= start_time,
                 Transactions.transactions_date <= end_time
             )
@@ -87,8 +87,8 @@ class TransactionService(BaseService):
             .join(Products, Transactions.product_id == Products.id)
             .join(Customers, Transactions.customer_id == Customers.id)
             .filter(
-                Transactions.transactions_type == transactions_type,
-                Products.product_type == product_type,
+                func.lower(Transactions.transactions_type) == transactions_type.lower(),
+                func.lower(Products.product_type) == product_type.lower(),
                 Transactions.transactions_date >= start_time,
                 Transactions.transactions_date <= end_time,
                 Transactions.customer_id.in_(self.db.query(subquery.c.customer_id))
@@ -158,8 +158,8 @@ class TransactionService(BaseService):
             self.db.query(Transactions)
             .join(Products, Transactions.product_id == Products.id)
             .filter(
-                Transactions.transactions_type == transactions_type,
-                Products.product_type == product_type,
+                func.lower(Transactions.transactions_type) == transactions_type.lower(),
+                func.lower(Products.product_type) == product_type.lower(),
                 Transactions.transactions_date >= start_time,
                 Transactions.transactions_date <= end_time
             )

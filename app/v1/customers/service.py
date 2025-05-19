@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 # Third party package
 from fastapi import Request, HTTPException, Depends, status
+from sqlalchemy import func
 
 # Import from other folders
 from core.service import BaseService
@@ -43,7 +44,7 @@ class CustomerService(BaseService):
             Customers: The matched customer record from the database.
         """
         query = self.db.query(Customers).filter(
-            Customers.name == customer_name,
+            func.lower(Customers.name) == customer_name.lower(),
             Customers.phone_number == customer_phone_number,
             Customers.revoke == False
         ).first()
