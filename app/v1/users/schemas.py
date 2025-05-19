@@ -1,7 +1,7 @@
 # Language native package
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, Field
 
 # Third party package
 from fastapi import HTTPException, status
@@ -21,13 +21,10 @@ class CommonAccount(BaseModel):
         Ensures the 'account' field is not empty and passes additional
         user info validation via `validate_user_info`.
     """
-
-    account: str
+    account: str = Field(..., min_length=3, max_length=20, description="User account identifier")
 
     @model_validator(mode='after')
     def check_argument(self) -> 'CommonAccount':
-        if not self.account:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Account cannot be empty")
         validate_user_info(self.account, "Account")
         return self
 
@@ -43,13 +40,10 @@ class CommonNickname(BaseModel):
         Ensures the 'nickname' field is not empty and passes additional
         user info validation via `validate_user_info`.
     """
-
-    nickname: str
+    nickname: str = Field(..., min_length=3, max_length=20, description="User nickname identifier")
 
     @model_validator(mode='after')
     def check_argument(self) -> 'CommonNickname':
-        if not self.nickname:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nickname cannot be empty")
         validate_user_info(self.nickname, "Nickname")
         return self
 
@@ -69,12 +63,10 @@ class RegisterPayload(CommonAccount, CommonNickname):
         Ensures the 'password' field is not empty and passes additional
         user info validation via `validate_user_info`.
     """
-    password: str
+    password: str = Field(..., min_length=6, max_length=8, description="User password")
 
     @model_validator(mode='after')
     def check_argument(self) -> 'RegisterPayload':
-        if not self.password:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Arguments cannot be empty")
         validate_user_info(self.password, "Password")        
         return self
 
@@ -91,8 +83,8 @@ class QueryUser(BaseModel):
         If provided, validates 'account' and 'nickname' fields using
         the `validate_user_info` function.
     """
-    account: Optional[str] = None
-    nickname: Optional[str] = None
+    account: Optional[str] = Field(None, min_length=3, max_length=20, description="User account identifier")
+    nickname: Optional[str] = Field(None, min_length=3, max_length=20, description="User nickname identifier")
 
     @model_validator(mode='after')
     def check_argument(self) -> 'QueryUser':
@@ -125,13 +117,11 @@ class UpdatePasswordPayload(CommonAccount):
         - Checks that the new password is different from the old password.
         - Applies user info validation on both passwords.
     """
-    old_password: str
-    new_password: str
+    old_password: str = Field(..., min_length=6, max_length=8, description="Old password")
+    new_password: str = Field(..., min_length=6, max_length=8, description="New password")
 
     @model_validator(mode='after')
     def check_argument(self) -> 'UpdatePasswordPayload':
-        if not self.old_password or not self.new_password:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Arguments cannot be empty")
         if self.old_password == self.new_password:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="New password cannot be the same as old password")
         validate_user_info(self.old_password, "Password")
@@ -150,12 +140,10 @@ class UpdatePasswordByAdmin(CommonAccount):
         - Ensures the new password is not empty.
         - Applies user info validation on the new password.
     """
-    new_password: str
+    new_password: str = Field(..., min_length=6, max_length=8, description="New password")
 
     @model_validator(mode='after')
     def check_argument(self) -> 'UpdatePasswordByAdmin':
-        if not self.new_password:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password cannot be emtpy.")
         validate_user_info(self.new_password, "Password")
         return self
 
@@ -164,18 +152,15 @@ class RegisterResponse(BaseModel):
     """
     Register response model for user registration.
     """
-    account: str
-    nickname: str
-    is_admin: bool
+    account: str = Field(..., description="User account identifier")
+    nickname: str = Field(..., description="User nickname identifier")
+    is_admin: bool = Field(..., description="Is the user an admin")
 
 
-class UsersResponse(BaseModel):
+class UsersResponse(RegisterResponse):
     """
     Users response model for user information retrieval.
     """
-    account: str
-    nickname: str
-    is_admin: bool
-    registered_time: datetime
-    revoke: bool
-    revoked_time: Optional[datetime] = None
+    registered_time: datetime = Field(..., description="Time when the user registered")
+    revoke: bool = Field(..., description="Is the user revoked")
+    revoked_time: Optional[datetime] = Field(None, description="Time when the user was revoked")

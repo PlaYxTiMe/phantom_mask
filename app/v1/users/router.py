@@ -1,10 +1,12 @@
 # Language native package
+from typing import List
 from typing_extensions import Annotated
 
 # Third party package
 from fastapi import APIRouter, Depends, Body
 
 # Import from other folders
+from core.error_response import default_error_responses
 from app.v1.users.service import UserService
 from app.v1.users.schemas import (
     RegisterPayload, 
@@ -21,7 +23,11 @@ from app.dependencies.user import validate_create_data
 router = APIRouter()
 
 
-@router.post('/register', response_model=ResponseModel[RegisterResponse])
+@router.post(
+    '/register',
+    response_model=ResponseModel[RegisterResponse],
+    responses=default_error_responses()
+)
 async def register_user(
     service: Annotated[UserService, Depends()],
     data: Annotated[RegisterPayload, Depends(validate_create_data)]
@@ -40,7 +46,11 @@ async def register_user(
     )
 
 
-@router.post('/unregister', response_model=ResponseModel[None])
+@router.post(
+    '/unregister',
+    response_model=ResponseModel[None],
+    responses=default_error_responses()
+)
 async def unregister_user(
     service: Annotated[UserService, Depends()],
     data: Annotated[RevokePayload, Body()]
@@ -55,8 +65,12 @@ async def unregister_user(
     )
 
 
-@router.put('/update_password_by_admin', response_model=ResponseModel[str])
-async def update_password(
+@router.put(
+    '/update_password_by_admin',
+    response_model=ResponseModel[str],
+    responses=default_error_responses()
+)
+async def update_password_by_admin(
     service: Annotated[UserService, Depends()],
     data: Annotated[UpdatePasswordByAdmin, Body()]
 ):
@@ -71,7 +85,11 @@ async def update_password(
     )
 
 
-@router.get('/get_users', response_model=ResponseModel[list[UsersResponse]])
+@router.get(
+    '/get_users',
+    response_model=ResponseModel[List[UsersResponse]],
+    responses=default_error_responses()
+)
 async def get_users(
     service: Annotated[UserService, Depends()],
     query: Annotated[QueryUser, Depends()]

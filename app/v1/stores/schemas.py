@@ -1,5 +1,5 @@
 # Language native package
-from typing import Literal, Annotated
+from typing import Literal, Annotated, Optional, List
 from datetime import datetime
 from pydantic import BaseModel, model_validator, Field
 
@@ -15,8 +15,8 @@ class CommonPage(BaseModel):
         page (int): The current page number. Defaults to 1.
         per_page (int): The number of items to display per page. Defaults to 10.
     """
-    page: int = 1
-    per_page: int = 10
+    page: int = Field(1, ge=1, description="The current page number, must be >= 1")
+    per_page: int = Field(10, gt=0, description="The number of items to display per page, must be > 0")
 
 
 class QueryStorePayload(CommonPage):
@@ -37,10 +37,13 @@ class QueryStorePayload(CommonPage):
         - Validates `datetime` format if `search_fields` is "datetime".
         - Ensures valid weekday abbreviation if `search_fields` is "day-of-week".
     """
-    store_type: str = ""
-    search_fields: Annotated[Literal["", "name", "datetime", "day-of-week"], Field(default="")]
-    fields_value: str = ""
-    only_active: bool = True
+    store_type: str = Field("", description="Optional filter by store type")
+    search_fields: Annotated[
+        Optional[Literal["name", "datetime", "day-of-week"]],
+        Field(default=None, description="Optional search field, can be one of: 'name', 'datetime', 'day-of-week'")
+    ]
+    fields_value: str = Field("", description="The value to match for the selected search field")
+    only_active: bool = Field(True, description="If True, only returns active stores")
 
     @model_validator(mode='after')
     def check_argument(self) -> 'QueryStorePayload':
@@ -56,6 +59,7 @@ class QueryStorePayload(CommonPage):
         elif self.search_fields == "day-of-week":
             if self.fields_value.lower() not in weekday_list:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please input correct abbreviation for weekday.")
+        return self
 
 
 class QueryStoreProductsPayload(CommonPage):
@@ -78,22 +82,48 @@ class QueryStoreProductsPayload(CommonPage):
         - Ensures `store_name`, `store_type`, and `product_type` are not empty.
         - Ensures `fields_value` is provided if `search_fields` is specified.
     """
-    store_name: str
-    store_type: str
-    product_type: str
-    search_fields: Annotated[Literal["", "brand", "color"], Field(default="")]
-    fields_value: str = ""
-    only_active: bool = True
-    reverse: bool = False
+    store_name: str = Field(..., min_length=1, description="Name of the store")
+    store_type: str = Field(..., min_length=1, description="Type of the store (e.g., pharmacy)")
+    product_type: str = Field(..., min_length=1, description="Type of product (e.g., mask)")
+    search_fields: Annotated[
+        Optional[Literal["brand", "color"]],
+        Field(default=None, description="Optional search field, can be one of: 'brand', 'color'")
+    ]
+    fields_value: str = Field("", description="The value to match for the selected search field")
+    only_active: bool = Field(True, description="If True, only include active products")
+    reverse: bool = Field(False, description="If True, reverse the default sorting order")
 
     @model_validator(mode='after')
     def check_argument(self) -> 'QueryStoreProductsPayload':
-        if not self.store_name:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Store name cannot be empty")
-        if not self.store_type:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Store type cannot be empty")
-        if not self.product_type:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Product type cannot be empty")
         if self.search_fields and not self.fields_value:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot be null when searching")
         return self
+
+
+class StoreCommonResponse(BaseModel):
+    store_name: str = Field(..., description="Name of the store")
+    store_type: str = Field(..., description="Type of the store")
+    is_active: bool = Field(..., description="Is the store active or not")
+
+
+class StoreWithCashResponse(StoreCommonResponse):
+    cashbalance: float = Field(..., description="Current cash balance of the store")
+
+
+class GetStoresResponse(BaseModel):
+    stores: List[StoreWithCashResponse] = Field(..., description="List of stores with their cash balance")
+    total_pages: int = Field(..., description="Total number of pages available")
+
+
+class ProductWithPriceResponse(BaseModel):
+    product_type: str = Field(..., description="Type of the product")
+    brand: str = Field(..., description="Brand of the product")
+    color: str = Field(..., description="Color of the product")
+    pack_size: int = Field(..., description="Size of the product pack")
+    price: float = Field(..., description="Price of the product")
+    is_active: bool = Field(..., description="Is the product active or not")
+
+
+class ProductByStoreResponse(StoreCommonResponse):
+    products: List[ProductWithPriceResponse] = Field(..., description="List of products with price info")
+    total_pages: int = Field(..., description="Total number of pages available")

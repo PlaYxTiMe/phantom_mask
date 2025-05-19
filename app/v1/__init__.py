@@ -8,12 +8,11 @@ from app.v1.products.router import router as products_router
 from app.v1.stores.router import router as stores_router
 from app.v1.transactions.router import router as transactions_router
 from app.v1.users.router import router as users_router
-from app.dependencies.user import check_admin, get_current_user
+from app.dependencies.user import check_admin
 
 
 router = APIRouter(
-    prefix="/api/v1",
-    dependencies=[Depends(get_current_user)]
+    prefix="/api/v1"
 )
 
 router.include_router(authtication_router, tags=["Authtication"], prefix="/auth")

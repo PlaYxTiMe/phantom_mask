@@ -9,6 +9,7 @@ from fastapi import Depends, APIRouter
 from core.auth import TokenType, JWT
 from core.config import settings
 from core.database import db_session
+from core.error_response import default_error_responses
 from lib.auth_utils import create_token_and_expiration, revoke_token
 from app.v1.authtication import router
 from app.v1.authtication.schemas import TokenResponse, TokenWithUserResponse
@@ -22,15 +23,17 @@ from app.dependencies.user import get_current_user
 router = APIRouter()
 
 
-@router.post("/token", response_model=ResponseModel[TokenWithUserResponse])
+@router.post(
+    "/token",
+    response_model=ResponseModel[TokenWithUserResponse],
+    responses=default_error_responses()
+)
 async def token(
     db: db_session,
     user: Annotated[Users, Depends(authenticate_user)],
 ) -> TokenWithUserResponse:
     """
     Generate access and refresh tokens for the authenticated user.
-    :param db: Database session.
-    :param user: The authenticated user.
     """
     access_token, access_token_expire_at = create_token_and_expiration(
         db, TokenType.ACCESS, user.id
@@ -54,7 +57,11 @@ async def token(
     )
 
 
-@router.post("/token/refresh", response_model=ResponseModel[TokenResponse])
+@router.post(
+    "/token/refresh",
+    response_model=ResponseModel[TokenResponse],
+    responses=default_error_responses()
+)
 async def token_refresh(
     db: db_session,
     refresh_token_modules: Annotated[Token, Depends(authenticate_refresh_token)]

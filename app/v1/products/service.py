@@ -5,14 +5,16 @@ from collections import defaultdict
 
 # Third party package
 import operator
-from fastapi import Request, HTTPException, status
+from fastapi import Request, HTTPException, status, Depends
 
 # Import from other folders
 from core.service import BaseService
 from core.database import db_session
+from app.v1.users.modules import Users
 from app.v1.products.modules import Products
 from app.v1.stores.modules import Stores
 from app.v1.common.modules import StoresProducts
+from app.dependencies.user import get_current_user
 
 
 error_logger = logging.getLogger("errorLogger")
@@ -43,9 +45,10 @@ class ProductService(BaseService):
         "eq": operator.eq
     }
 
-    def __init__(self, request: Request, db: db_session) -> None:
+    def __init__(self, request: Request, db: db_session, user: Users = Depends(get_current_user)) -> None:
         self.request = request
         self.db = db
+        self.current_user = user
     
     def raise_exception(self, status_code:int, detail:str) -> None:
         raise HTTPException(status_code=status_code, detail=detail)
@@ -115,3 +118,127 @@ class ProductService(BaseService):
         results = list(store_map.values())
 
         return results
+
+    def get_products(
+            self,
+            page: int,
+            per_page: int,
+            product_type: str,
+            search_fields: str,
+            fields_value: str,
+            only_active: bool
+        ) -> Dict:
+        """
+        Retrieve a paginated list of products filtered by type and optional search criteria,
+        along with store details and pricing information.
+
+        Args:
+            page (int): The current page number (1-based).
+            per_page (int): Number of products to return per page.
+            product_type (str): Filter products by this product type.
+            search_fields (str): Product attribute to search on (e.g., brand, color).
+            fields_value (str): Value to search for in the specified product attribute.
+            only_active (bool): Whether to filter only active products and stores.
+
+        Returns:
+            dict: A dictionary containing:
+                - "products": A list of products with their details and associated stores sorted by price.
+                - "total_pages": Total number of pages available for the given per_page limit.
+        """
+        query = (
+            self.db.query(Products).join(StoresProducts).join(Stores).filter(
+                Products.product_type == product_type
+            )
+        )
+
+        if search_fields and fields_value:
+            if hasattr(Products, search_fields):
+                query = query.filter(getattr(Products, search_fields).ilike(f"%{fields_value}%"))
+            else:
+                self.raise_exception(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid search field: {search_fields}"
+                )
+        
+        if only_active:
+            query = query.filter(
+                Products.is_active == only_active,
+                Stores.is_active == only_active
+            )
+
+        total_items = query.distinct(Products.id).count()
+        total_pages = (total_items + per_page - 1) // per_page
+        page_items = (
+            query.distinct(Products.id)
+            .order_by(Products.brand, Products.color, Products.pack_size)
+            .offset((page - 1) * per_page)
+            .limit(per_page)
+            .all()
+        )
+
+        results = []
+        for item in page_items:
+            products_detail = {
+                "product_type": item.product_type,
+                "brand": item.brand,
+                "color": item.color,
+                "pack_size": item.pack_size,
+                "stores": []
+            }
+            item.stores.sort(key=lambda x: x.price)
+            for store in item.stores:
+                products_detail["stores"].append({
+                    "store_name": store.store.name,
+                    "store_type": store.store.store_type,
+                    "price": store.price,
+                    "is_active": store.store.is_active
+                })
+            results.append(products_detail)
+        
+        return {"products": results, "total_pages": total_pages}
+
+    def get_product_price(self,
+        store_name:str,
+        store_type:str,
+        product_type:str,
+        brand:str,
+        color:str,
+        pack_size:int,
+        only_active:bool=True
+    ) -> StoresProducts:
+        """
+        Retrieve the price and details of a specific product in a specific store.
+
+        Args:
+            store_name (str): The name of the store.
+            store_type (str): The type/category of the store.
+            product_type (str): The type/category of the product.
+            brand (str): The brand of the product.
+            color (str): The color of the product.
+            pack_size (int): The pack size of the product.
+            only_active (bool): Whether to filter only active products and stores (default is True).
+
+        Returns:
+            StoresProducts: The matching store-product relationship, including price and inventory info.
+        """
+        query = self.db.query(StoresProducts).join(Products).join(Stores).filter(
+            Stores.name == store_name,
+            Stores.store_type == store_type,
+            Products.product_type == product_type,
+            Products.brand == brand,
+            Products.color == color,
+            Products.pack_size == pack_size
+        )
+        if only_active:
+            query = query.filter(
+                Stores.is_active == only_active,
+                Products.is_active == only_active
+            )
+        item = query.first()
+        if not item:
+            self.raise_exception(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Product not found in the specified store"
+            )
+        
+        return item

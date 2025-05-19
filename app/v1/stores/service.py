@@ -5,14 +5,17 @@ from datetime import datetime
 
 # Third party package
 from sqlalchemy import and_
-from fastapi import Request, HTTPException, status
+from fastapi import Request, HTTPException, status, Depends
 
 # Import from other folders
 from core.service import BaseService
 from core.database import db_session
+from app.v1.users.modules import Users
 from app.v1.stores.modules import Stores
 from app.v1.products.modules import Products
 from app.v1.common.modules import Opentime, StoresProducts
+from app.dependencies.user import get_current_user
+
 
 
 error_logger = logging.getLogger("errorLogger")
@@ -31,12 +34,12 @@ class StoreService(BaseService):
         db (db_session): Database session used for executing queries.
     """
     # Fixed constants should be placed at the class level to save memory.
-    search_store_column = ['name']
     weekdays = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"]
 
-    def __init__(self, request:Request, db: db_session) -> None:
+    def __init__(self, request:Request, db: db_session, user: Users = Depends(get_current_user)) -> None:
         self.request = request
         self.db = db
+        self.current_user = user
 
     def raise_exception(self, status_code:int, detail:str) -> None:
         raise HTTPException(status_code=status_code, detail=detail)
@@ -123,7 +126,7 @@ class StoreService(BaseService):
             query = query.filter(Stores.is_active == only_active)
         
         if search_fields and fields_value:
-            if search_fields in self.search_store_column:
+            if hasattr(Stores, search_fields):
                 query = query.filter(getattr(Stores, search_fields).ilike(f"%{fields_value}%"))
             else:
                 if search_fields == 'datetime':
@@ -152,7 +155,7 @@ class StoreService(BaseService):
                     "is_active": item.is_active
                 })
 
-        return {"data": results, "total_pages": total_pages}
+        return {"stores": results, "total_pages": total_pages}
     
     def get_store_products(
             self, 
@@ -240,3 +243,30 @@ class StoreService(BaseService):
                 })
         
         return results
+
+    def get_store_module(self, store_name:str, store_type:str, only_active:bool=True) -> Stores:
+        """
+        Retrieve a store module based on store name and type.
+
+        Args:
+            store_name (str): The name of the store.
+            store_type (str): The type of the store.
+
+        Returns:
+            Stores: The store module if found.
+        """
+        query = self.db.query(Stores).filter(
+            and_(
+                Stores.name == store_name,
+                Stores.store_type == store_type
+            )
+        )
+
+        if only_active:
+            query = query.filter(Stores.is_active == only_active)
+        
+        item = query.first()
+        if not item:
+            self.raise_exception(status_code=404, detail="Store not found.")
+        
+        return item

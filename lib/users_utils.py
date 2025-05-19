@@ -16,7 +16,7 @@ def validate_user_info(value: str, field:str) -> None:
 
     if field.lower() == "password":
         pattern = r"^[A-Za-z0-9_#]+$"
-        if len(value) < 6 or len(value) > 8 or not re.match(pattern, value):
+        if not re.match(pattern, value):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, 
                 detail=f"{field} must be 6-8 characters long and can only contain letters, numbers, underscores and #"
@@ -24,7 +24,7 @@ def validate_user_info(value: str, field:str) -> None:
     else:
         pattern = r"^[A-Za-z0-9_]+$"
 
-        if len(value) < 3 or len(value) > 20 or not re.match(pattern, value):
+        if not re.match(pattern, value):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, 
                 detail=f"{field} must be 3-20 characters long and can only contain letters, numbers, and underscores."
