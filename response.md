@@ -24,8 +24,11 @@
   - [POST] /api/v1/transactions/purchase
   - This API requires multiple parameters. Customer information can be retrieved from the /api/v1/customers/get_customers endpoint. For testing purposes, the remaining parameters can be conveniently filled using data from pharmacies.json.
 ### A.2. API Document
+
 Import [this](https://drive.google.com/file/d/1iy_5vEVW3tP59tzZroXny3_Pwd7vLoOr/view?usp=sharing) json file to Postman.
+
 API Document Endpoint: [Demo_site_doc1](https://api.kurocat.space/docs) or [Demo_site_doc2](https://api.kurocat.space/redoc)
+
 [Google document](https://docs.google.com/document/d/1hyj0xzWqWRY8QMrLK--tMldoir4IJ38TKA56C93HXV4/edit?tab=t.0)
 
 ### A.3. Import Data Commands
